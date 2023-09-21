@@ -1,0 +1,38 @@
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: hello-world
+          uri: http://httpbin.org/
+          predicates:
+            - Path=/hello
+          filters:
+            - SetPath=/get
+        - id: full
+          uri: http://10.70.250.42:8080
+          predicates:
+            - Path=/detran/municipios-pi
+          filters:
+            - SetPath=/ws-detran/rest/detran/renavam/ws/municipios-pi
+        - id: viacep
+          uri: https://viacep.com.br
+          predicates:
+            - Path=/cep/v1/{cep}
+          filters:
+            - RewritePath=/cep/v1/(?<cep>.*), /ws/${cep}/json/
+        - id: brasilapi
+          uri: https://brasilapi.com.br
+          predicates:
+            - Path=/cep/v2/{cep}
+          filters:
+            - RewritePath=/cep/v2/(?<cep>.*), /api/cep/v1/${cep}
+        - id: brasilapi-full
+          uri: https://brasilapi.com.br
+          predicates:
+            - Path=/brasilapi/**
+          filters:
+            - RewritePath=/brasilapi/(?<endpoints>.*), /api/${endpoints}
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
